@@ -1,0 +1,197 @@
+<div>
+    <nav id="navTop" class="navbar">
+      <div class="container-fluid mt-1 mb-1">
+        <div class="navbar-header">
+          <a id="logo" class="navbar-brand" href="#">SoftOne</a>
+        </div>
+      </div>
+    </nav>
+</div>
+
+<div class="inventory-section m-4 mt-4">
+    <div class="row dx-flex align-items-center">
+        <div class="col-md-8">
+          <h4 class="header-main">Student Management</h4>
+        </div>
+        <div class="col-md-4 text-end">
+          <button class="btn btn-primary n-button" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Student</button>
+        </div>
+      </div>
+      
+    
+    <div class="row mt-5">
+        <dx-data-grid #grid id="gridContainer" [showBorders]="true" [dataSource]="dataSource" class="centered-cells"
+            [columnAutoWidth]="true" [selectedRowKeys]="[]" [showBorders]="true" [columnHidingEnabled]="true" [allowColumnResizing]="true">
+
+            <dxo-search-panel [visible]="true" placeholder="Filter Table Data"></dxo-search-panel>
+            <dxo-sorting mode="multiple"></dxo-sorting>
+            <dxo-paging [pageSize]="10"></dxo-paging>
+            <dxo-header-filter fixedPosition="right" [visible]="true" [allowSearch]="true"></dxo-header-filter>
+            <dxo-editing mode="row" [allowUpdating]="true" [allowDeleting]="true" [useIcons]="true"></dxo-editing>
+            <dxi-column type="buttons" width="7%">
+                <dxi-button name="edit"></dxi-button>
+                <dxi-button name="delete"></dxi-button>
+              </dxi-column>
+            <dxo-pager [showPageSizeSelector]="true" [showNavigationButtons]="true" [allowedPageSizes]="[10, 20]" [showInfo]="true"> </dxo-pager>
+            <dxi-column dataField="first_Name" caption="First Name" alignment="center" [allowEditing]="true">
+                    <dxi-validation-rule type="required" message="First Name is required"></dxi-validation-rule>
+            </dxi-column>
+            <dxi-column dataField="last_Name" caption="Last Name" alignment="center" [width]="150">
+                    <dxi-validation-rule type="required" message="Last Name is required"></dxi-validation-rule>
+            </dxi-column>
+            <dxi-column dataField="phone" caption="Mobile No" alignment="center">
+                    <dxi-validation-rule type="pattern" pattern="^[0-9]+$" message="Please enter numbers only"></dxi-validation-rule>
+                    <dxi-validation-rule type="required" message="Mobile No is required"></dxi-validation-rule> 
+            </dxi-column>
+            <dxi-column dataField="email" caption="Email" alignment="center">     
+                    <dxi-validation-rule type="pattern" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" message="Please enter a valid email address"></dxi-validation-rule>
+                    <dxi-validation-rule type="required" message="Email is required"></dxi-validation-rule>      
+            </dxi-column>
+            <dxi-column dataField="nic" caption="NIC" alignment="center">
+                    <dxi-validation-rule type="required" message="NIC is required"></dxi-validation-rule>
+             </dxi-column>
+             <dxi-column dataField="dob" caption="DOB" alignment="center" [width]="130" cellTemplate="dates">
+                <dxi-validation-rule type="required" message="DOB is required"></dxi-validation-rule>
+            </dxi-column>
+            
+            <dxi-column dataField="address" caption="Addresss" alignment="center" [width]="200">
+                    <dxi-validation-rule type="required" message="Address is required"></dxi-validation-rule>
+             </dxi-column>
+
+             <dxi-column dataField="profile_URL" caption="" alignment="center" [width]="100" cellTemplate="profileImage" 
+             [allowSearch]="false" [allowSorting]="false" [allowResizing]="false" [allowReordering]="false"
+             [allowHiding]="false" [allowHeaderFiltering]="false" [allowGrouping]="false" [allowFiltering]="false"
+             >
+            </dxi-column>
+
+           <div *dxTemplate="let item of 'dates'">
+                {{item.data.dob | date:'dd/MM/yyyy'}}
+           </div>
+
+           <div *dxTemplate="let item of 'profileImage'">
+                <img src="{{item.data.profile_URL ? item.data.profile_URL : './assets/images/default.png'}}" 
+                style="width: 50px; cursor: pointer;" (click)="selectProfile(item)" data-bs-toggle="modal" data-bs-target="#viewProfileModal">
+            </div>
+        </dx-data-grid>
+      </div>
+</div>
+
+
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="width:500px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{formTitle}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" #closeButton></button>
+        </div>
+        <form [formGroup]="studentForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+            <div class="row form-group mt-2">
+                <div class="col-md-4"><label>Profile Photo</label></div>
+                <div class="col-md-8 images-list">
+                    <img *ngFor="let image of profileImages let i = index"  
+                    src="{{image}}" class="profile-image"
+                    [ngClass]="{ selected: i === selectedImageIndex }"
+                    (click)="selectImage(i, image)"
+                    >
+                </div>
+            </div>
+            <div class="row form-group mt-4">
+                <div class="col-md-3 "><label>First Name</label></div>
+                <div class="col-md-9"><input type="text" class="form-control" formControlName="first_Name" placeholder="First Name" required></div>
+            </div>
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>Last Name</label></div>
+                <div class="col-md-9"><input type="text" class="form-control" formControlName="last_Name" placeholder="Last Name" required></div>
+            </div>
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>Mobile No</label></div>
+                <div class="col-md-9"><input type="text" class="form-control" formControlName="phone" placeholder="Mobile No" required></div>
+            </div>
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>Email</label></div>
+                <div class="col-md-9"><input type="email" class="form-control" formControlName="email" placeholder="Email" required></div>
+            </div>
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>NIC</label></div>
+                <div class="col-md-9"><input type="text" class="form-control" formControlName="nic" placeholder="NIC" required></div>
+            </div>  
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>DOB</label></div>
+                <div class="col-md-9"><input type="date" class="form-control" formControlName="dob" placeholder="DOB" required></div>
+            </div>  
+            <div class="row form-group mt-2">
+                <div class="col-md-3 "><label>Address</label></div>
+                <div class="col-md-9"><textarea class="form-control" formControlName="address" placeholder="Address" required></textarea></div>
+            </div>  
+            <div class="dx-flex justify-content-center align-items-center">
+                <div *ngIf="requiredMessage" class="error-message">
+                    {{requiredMessage}}
+                </div>
+            </div>
+                      
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="width: 120px;" #closeButton>Close</button>
+          <button type="submit" class="btn btn-primary" style="width: 120px;" >Save</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="viewProfileModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="width: 500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{selectedStudent.first_Name}} Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" #closeButton></button>
+            </div>
+            <div class="modal-body">
+                <div class="v-profile-photo">
+                    <img src="{{selectedStudent.profile_URL ? selectedStudent.profile_URL : './assets/images/default.png'}}" class="v-profile-image">
+                </div>
+                <div class="v-profile-details">
+                    <div class="v-profile-detail">
+                        <label>First Name:</label>
+                        <span>{{selectedStudent.first_Name}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>Last Name:</label>
+                        <span>{{selectedStudent.last_Name}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>Mobile No:</label>
+                        <span>{{selectedStudent.phone}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>Email:</label>
+                        <span>{{selectedStudent.email}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>NIC:</label>
+                        <span>{{selectedStudent.nic}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>DOB:</label>
+                        <span>{{selectedStudent.dob | date:'dd/MM/yyyy'}}</span>
+                    </div>
+                    <div class="v-profile-detail">
+                        <label>Address:</label>
+                        <span>{{selectedStudent.address}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+ 
+
+
+ 
